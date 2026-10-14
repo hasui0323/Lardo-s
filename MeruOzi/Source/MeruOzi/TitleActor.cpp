@@ -24,7 +24,7 @@ void ATitleActor::BeginPlay()
     if (PlayerController)
     {
         //マウスカーソルを表示する
-        PlayerController->bShowMouseCursor = true;
+        //PlayerController->bShowMouseCursor = true;
 
         //ゲーム画面の入力を受け取れるようにする
         FInputModeGameAndUI InputMode;
