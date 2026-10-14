@@ -47,7 +47,7 @@ AFCharacter::AFCharacter()
 
     // 移動・ジャンプ設定
     GetCharacterMovement()->MaxWalkSpeed = 300.0f;      //最大移動速度
-    GetCharacterMovement()->JumpZVelocity = 700.0f;     //ジャンプの初速（大きくすれば高くジャンプする）
+    GetCharacterMovement()->JumpZVelocity = 500.0f;     //ジャンプの初速（大きくすれば高くジャンプする）
     GetCharacterMovement()->AirControl = 0.35f;         //空中で向きを変える操作の強さ
 }
 
@@ -59,9 +59,16 @@ void AFCharacter::BeginPlay()
     //現在のコントローラーをプレイヤーコントローラーとして取得する
     APlayerController* PC = Cast<APlayerController>(Controller);
 
+
     if (PC)
     {
         ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
+
+            // マウスカーソルを非表示にする
+            PC->bShowMouseCursor = false;
+
+            // ゲーム操作に入力を戻す
+            PC->SetInputMode(FInputModeGameOnly());
 
         if (LocalPlayer)
         {
@@ -155,7 +162,7 @@ void AFCharacter::Look(const FInputActionValue& Value)
     FVector2D Input = Value.Get<FVector2D>();
 
     AddControllerYawInput(Input.X);
-    AddControllerPitchInput(Input.Y);
+    AddControllerPitchInput(-Input.Y);
 }
 
 //ジャンプを開始する処理
