@@ -1,0 +1,65 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "FItem.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SphereComponent.h"
+
+// Sets default values
+AFItem::AFItem()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+
+    // Œ©‚½–Ú
+    ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(
+        TEXT("ItemMesh")
+    );
+    SetRootComponent(ItemMesh);
+
+    // “–‚½‚è”»’è
+    Collision = CreateDefaultSubobject<USphereComponent>(
+        TEXT("Collision")
+    );
+    Collision->SetupAttachment(ItemMesh);
+
+    Collision->SetCollisionEnabled(
+        ECollisionEnabled::QueryOnly
+    );
+    Collision->SetCollisionResponseToAllChannels(
+        ECR_Overlap
+    );
+    Collision->SetGenerateOverlapEvents(true);
+
+    // ÚGŽž‚Ìˆ—‚ð“o˜^
+    Collision->OnComponentBeginOverlap.AddDynamic(
+        this, &AFItem::OnOverlapBegin
+    );
+}
+
+void AFItem::OnOverlapBegin(
+    UPrimitiveComponent* OverlappedComponent,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult
+)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Item Overlap!"));
+
+    if (OtherActor)
+    {
+        UE_LOG(
+            LogTemp,
+            Warning,
+            TEXT("Touched Actor: %s"),
+            *OtherActor->GetName()
+        );
+
+        if (OtherActor != this)
+        {
+            Destroy();
+        }
+    }
+}
