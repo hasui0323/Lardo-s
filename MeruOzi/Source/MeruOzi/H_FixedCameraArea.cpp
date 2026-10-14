@@ -10,6 +10,9 @@
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -150,6 +153,9 @@ void AH_FixedCameraArea::SwitchCamera()
     APlayerController* PC =
         UGameplayStatics::GetPlayerController(this, 0);
 
+    APawn* PlayerPawn =
+        UGameplayStatics::GetPlayerPawn(this, 0);
+
     if (!PC)
     {
         return;
@@ -162,6 +168,10 @@ void AH_FixedCameraArea::SwitchCamera()
 
         // 固定カメラへ切り替える
         PC->SetViewTargetWithBlend(this, 0.5f);
+
+        // プレイヤーの操作を無効にする
+        PC->SetIgnoreMoveInput(true);
+        PC->SetIgnoreLookInput(true);
 
         bCameraFixed = true;
     }
@@ -180,6 +190,10 @@ void AH_FixedCameraArea::RestoreCamera()
     {
         PC->SetViewTargetWithBlend(
             PreviousViewTarget, 0.5f);
+
+        // プレイヤーの操作を再び有効にする
+        PC->SetIgnoreMoveInput(false);
+        PC->SetIgnoreLookInput(false);
     }
 
     PreviousViewTarget = nullptr;
