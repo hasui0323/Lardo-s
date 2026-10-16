@@ -9,49 +9,45 @@ AMMovefloor::AMMovefloor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// StaticMeshComponentの作成
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
+	PlatformMesh = CreateDefaultSubobject<UStaticMeshComponent>
+		(TEXT("PlatformMesh"));
+	RootComponent = PlatformMesh;
 
-	// コンポーネントのアタッチ
-	Mesh->SetupAttachment(RootComponent);
-
-	// ObjectとしてStaticMeshオブジェクトをロード
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/LevelPrototyping/Meshes/SM_Cube.SM_Cube"));
-
-	// キューブアセットのロードに成功した場合
-	if (CubeVisualAsset.Succeeded())
-	{
-		// モデルのセットと位置のセット
-		Mesh->SetStaticMesh(CubeVisualAsset.Object);
-	}
-
-	// メッシュの大きさを指定
-	Mesh->SetRelativeScale3D(FVector(5, 5, 1.5f));
-
-	// RotatingMovementComponentのコンポーネント設定
-	Rotating = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("Rotation"));
-
-	// 回転する軸の位置を指定
-	Rotating->PivotTranslation = FVector(250, 250, 250);
-
-	// 回転量を設定
-	MeshRotationValue = FRotator(100, 200, 0);
 }
 
 // Called when the game starts or when spawned
 void AMMovefloor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 回転する軸に回転量を設定
-	Rotating->RotationRate = MeshRotationValue;
-	
+	StartLocation = GetActorLocation();
+	MoveDirection.Normalize();
 }
 
 // Called every frame
 void AMMovefloor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	MovePlatform(DeltaTime);
 }
 
+void AMMovefloor::MovePlatform(float DeltaTime)
+{
+	FVector CurrentLocation = GetActorLocation();
+
+	//移動ベクトルを計算して現在の位置に追加
+	CurrentLocation += MoveDirection * MoveSpeed * DeltaTime;
+
+	//bSweepをtrueにすることで、上に乗っているプレイヤーを押し出したり運んだりする
+	FHitResult Hit;
+	SetActorLocation(CurrentLocation, true, &Hit);
+
+	//動き出し開始地点からの距離をチェック
+	float DistanceMoved = FVector::Dist(StartLocation, CurrentLocation);
+
+	if (DistanceMoved >= MoveDistance)
+	{
+		//誤差を排除(Eliminate)するために、移動方向を反転し、開始地点を更新して位置を補正する
+		MoveDirection = -MoveDirection;
+		StartLocation = GetActorLocation();
+	}
+}

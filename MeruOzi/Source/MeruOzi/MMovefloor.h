@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include"GameFramework/RotatingMovementComponent.h"
-#include"Kismet/kismetSystemLibrary.h"
 #include "MMovefloor.generated.h"
 
 UCLASS()
@@ -23,19 +21,25 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    virtual void Tick(float DeltaTime) override; //
+private:
+    // 表示用のメッシュ
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UStaticMeshComponent* PlatformMesh;
 
-	//スタティックメッシュ用の変数
-	UPROPERTY(EditAnywhere,Category = "Mesh", BlueprintReadWrite)
-	UStaticMeshComponent* Mesh;
+    // 移動速度 (cm/s)
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float MoveSpeed = 100.f;
 
-	//RotatingMovementComponent用の変数
-	UPROPERTY(EditAnywhere, Category = "RotationMovement", BlueprintReadWrite)
-	URotatingMovementComponent* Rotating;
+    // 移動する最大距離
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float MoveDistance = 500.f;
 
-	//回転する各度量の変数
-	UPROPERTY(EditAnywhere,Category = "RotationValue",BlueprintReadWrite)
-	FRotator MeshRotationValue;
+    // 移動方向 (正規化されたベクトル)
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    FVector MoveDirection = FVector(1, 0, 0);
 
+    FVector StartLocation;
 
+    void MovePlatform(float DeltaTime);  //
 };
