@@ -63,6 +63,17 @@ public:
 
     //--------------------------------------------------
 
+    //--------------------------------------------------
+    // アイテム取得ゲージ（0.0～1.0）
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemGauge")
+    float GaugePercent = 0.0f;
+
+    // ゲージを増やす関数
+    UFUNCTION(BlueprintCallable, Category = "ItemGauge")
+    void AddGauge(float Amount);
+
+    //--------------------------------------------------
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

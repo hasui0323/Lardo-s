@@ -176,3 +176,20 @@ void AFCharacter::StopJump()
 {
     StopJumping();
 }
+
+//アイテムのゲージ
+void AFCharacter::AddGauge(float Amount)
+{
+    GaugePercent = FMath::Clamp(
+        GaugePercent + Amount,
+        0.0f,
+        1.0f
+    );
+
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("Gauge: %f"),
+        GaugePercent * 100.0f
+    );
+}

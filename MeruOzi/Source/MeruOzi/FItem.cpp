@@ -1,9 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "FCharacter.h"
+
 #include "FItem.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
+
 
 // Sets default values
 AFItem::AFItem()
@@ -46,20 +49,34 @@ void AFItem::OnOverlapBegin(
     const FHitResult& SweepResult
 )
 {
-    UE_LOG(LogTemp, Warning, TEXT("Item Overlap!"));
+    // 接触した相手がプレイヤーか確認
+    AFCharacter* Player = Cast<AFCharacter>(OtherActor);
 
-    if (OtherActor)
+    if (Player)
     {
-        UE_LOG(
-            LogTemp,
-            Warning,
-            TEXT("Touched Actor: %s"),
-            *OtherActor->GetName()
-        );
+        // ゲージを20%増やす
+        Player->AddGauge(0.2f);
 
-        if (OtherActor != this)
-        {
-            Destroy();
-        }
+        // アイテムを消す
+        Destroy();
     }
 }
+
+//{
+//    UE_LOG(LogTemp, Warning, TEXT("Item Overlap!"));
+//
+//    if (OtherActor)
+//    {
+//        UE_LOG(
+//            LogTemp,
+//            Warning,
+//            TEXT("Touched Actor: %s"),
+//            *OtherActor->GetName()
+//        );
+//
+//        if (OtherActor != this)
+//        {
+//            Destroy();
+//        }
+//    }
+//}
