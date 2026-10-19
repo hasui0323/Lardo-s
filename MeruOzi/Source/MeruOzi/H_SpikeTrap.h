@@ -8,7 +8,7 @@
 
 class UStaticMeshComponent;
 class UBoxComponent;
-class UTimelineComponent;
+//class UTimelineComponent;
 
 UCLASS()
 class MERUOZI_API AH_SpikeTrap : public AActor

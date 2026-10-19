@@ -8,6 +8,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
+#include "CheckpointGameInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AH_SpikeTrap::AH_SpikeTrap()
@@ -36,6 +38,9 @@ AH_SpikeTrap::AH_SpikeTrap()
         ECR_Ignore);
     DamageBox->SetCollisionResponseToChannel(
         ECC_Pawn, ECR_Overlap);
+
+    // オーバーラップイベントを有効化
+    DamageBox->SetGenerateOverlapEvents(true);
 }
 
 // Called when the game starts or when spawned
@@ -130,6 +135,7 @@ void AH_SpikeTrap::RetractSpikes()
 
 void AH_SpikeTrap::CheckDamage()
 {
+    // とげが出ていなければ何もしない
     if (!bSpikeActive)
     {
         return;
@@ -137,24 +143,55 @@ void AH_SpikeTrap::CheckDamage()
 
     TArray<AActor*> OverlappingActors;
 
+    // ダメージ判定の範囲にいるCharacterを取得
     DamageBox->GetOverlappingActors(
         OverlappingActors,
         ACharacter::StaticClass());
 
     for (AActor* Actor : OverlappingActors)
     {
-        if (Actor)
+        ACharacter* Player = Cast<ACharacter>(Actor);
+
+        if (!Player)
         {
-            // プレイヤーを初期位置に戻す
-            Actor->SetActorLocation(
-                PlayerStartLocation);
-
-            // プレイヤーの向きも初期状態に戻す
-            Actor->SetActorRotation(
-                PlayerStartRotation);
-
-            // 同じ判定で何度も処理しないように終了
-            return;
+            continue;
         }
+
+        // チェックポイント情報を取得
+        UCheckpointGameInstance* GameInstance =
+            Cast<UCheckpointGameInstance>(
+                UGameplayStatics::GetGameInstance(this));
+
+        // 復活する位置を決める
+        FVector RespawnLocation = PlayerStartLocation;
+
+        if (GameInstance && GameInstance->bHasCheckpoint)
+        {
+            // 最後に通過したチェックポイントを使用
+            RespawnLocation =
+                GameInstance->SavedCheckpointLocation;
+        }
+
+        // プレイヤーの移動を停止
+        if (UCharacterMovementComponent* Movement =
+            Player->GetCharacterMovement())
+        {
+            Movement->StopMovementImmediately();
+        }
+
+        // 保存した位置へ戻す
+        Player->SetActorLocation(
+            RespawnLocation,
+            false,
+            nullptr,
+            ETeleportType::TeleportPhysics);
+
+        // プレイヤーの向きを初期状態に戻す
+        // 向きもチェックポイントごとに保存したい場合は、
+        // 別途Rotationの保存処理を追加する
+        Player->SetActorRotation(PlayerStartRotation);
+
+        // 1回の判定で処理を終了
+        return;
     }
 }
