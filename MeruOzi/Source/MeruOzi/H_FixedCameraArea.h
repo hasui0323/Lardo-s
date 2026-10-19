@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "NiagaraComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "H_FixedCameraArea.generated.h"
 
 class UBoxComponent;
@@ -68,4 +69,19 @@ protected:
 
     void SwitchCamera();
     void RestoreCamera();
+
+    // 視点変更の案内ウィジェット
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> PromptWidgetClass;
+
+    // 作成したウィジェットの実体
+    UPROPERTY()
+    UUserWidget* PromptWidget;
+
+    // 表示中かどうか
+    bool bPromptVisible = false;
+
+    // 表示・非表示の処理
+    void ShowPrompt();
+    void HidePrompt();
 };

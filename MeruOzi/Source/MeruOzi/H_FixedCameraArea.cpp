@@ -18,6 +18,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "InputCoreTypes.h"
 
+#include "Blueprint/UserWidget.h"
+
 // Sets default values
 AH_FixedCameraArea::AH_FixedCameraArea()
 {
@@ -93,6 +95,9 @@ void AH_FixedCameraArea::OnBeginOverlap(
 
     bPlayerInRange = true;
 
+    // Fキーの案内を表示
+    ShowPrompt();
+
     APlayerController* PC =
         UGameplayStatics::GetPlayerController(this, 0);
 
@@ -130,6 +135,9 @@ void AH_FixedCameraArea::OnEndOverlap(
     }
 
     bPlayerInRange = false;
+
+    // 案内文字を必ず消す
+    HidePrompt();
 
     APlayerController* PC =
         UGameplayStatics::GetPlayerController(this, 0);
@@ -176,11 +184,20 @@ void AH_FixedCameraArea::SwitchCamera()
         PC->SetIgnoreMoveInput(true);
         PC->SetIgnoreLookInput(true);
 
+        // 案内を非表示
+        HidePrompt();
+
         bCameraFixed = true;
     }
     else
     {
         RestoreCamera();
+
+        // 範囲内なら案内を再表示
+        if (bPlayerInRange)
+        {
+            ShowPrompt();
+        }
     }
 }
 
@@ -201,4 +218,42 @@ void AH_FixedCameraArea::RestoreCamera()
 
     PreviousViewTarget = nullptr;
     bCameraFixed = false;
+}
+
+// Fキーの案内を表示
+void AH_FixedCameraArea::ShowPrompt()
+{
+    if (PromptWidget || !PromptWidgetClass)
+    {
+        return;
+    }
+
+    APlayerController* PC =
+        UGameplayStatics::GetPlayerController(this, 0);
+
+    if (!PC)
+    {
+        return;
+    }
+
+    PromptWidget = CreateWidget<UUserWidget>(
+        PC, PromptWidgetClass);
+
+    if (PromptWidget)
+    {
+        PromptWidget->AddToViewport();
+        bPromptVisible = true;
+    }
+}
+
+// Fキーの案内を非表示
+void AH_FixedCameraArea::HidePrompt()
+{
+    if (PromptWidget)
+    {
+        PromptWidget->RemoveFromParent();
+        PromptWidget = nullptr;
+    }
+
+    bPromptVisible = false;
 }
