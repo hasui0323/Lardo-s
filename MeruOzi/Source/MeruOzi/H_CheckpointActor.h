@@ -8,6 +8,8 @@
 
 class UBoxComponent;
 class UPrimitiveComponent;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class MERUOZI_API AH_CheckpointActor : public AActor
@@ -18,6 +20,8 @@ public:
     AH_CheckpointActor();
 
 protected:
+    virtual void BeginPlay() override;
+
     // プレイヤーが入る範囲
     UPROPERTY(VisibleAnywhere, Category = "Checkpoint")
     TObjectPtr<UBoxComponent> TriggerBox;
@@ -32,4 +36,22 @@ protected:
         bool bFromSweep,
         const FHitResult& SweepResult
     );
+    // 触れる前のNiagara
+    UPROPERTY(VisibleAnywhere, Category = "Checkpoint")
+    TObjectPtr<UNiagaraComponent> NormalEffect;
+
+    // 触れた後のNiagara
+    UPROPERTY(VisibleAnywhere, Category = "Checkpoint")
+    TObjectPtr<UNiagaraComponent> ActivatedEffect;
+
+    // 触れる前のNiagara System
+    UPROPERTY(EditAnywhere, Category = "Checkpoint")
+    TObjectPtr<UNiagaraSystem> NormalNiagara;
+
+    // 触れた後のNiagara System
+    UPROPERTY(EditAnywhere, Category = "Checkpoint")
+    TObjectPtr<UNiagaraSystem> ActivatedNiagara;
+
+    // チェックポイントが有効になったか
+    bool bIsActivated = false;
 };

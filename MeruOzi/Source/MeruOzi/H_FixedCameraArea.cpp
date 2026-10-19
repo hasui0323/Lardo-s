@@ -29,6 +29,9 @@ AH_FixedCameraArea::AH_FixedCameraArea()
 
     SetRootComponent(Trigger);
 
+    // ”»’è”ÍˆÍ‚ðŒ»Ý‚Ì2”{‚É‚·‚é
+    Trigger->SetBoxExtent(FVector(200.0f, 200.0f, 200.0f));
+
     Trigger->SetCollisionEnabled(
         ECollisionEnabled::QueryOnly);
 

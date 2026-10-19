@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "CheckpointGameInstance.h"
 #include "GameFramework/Pawn.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 
 // Sets default values
 AH_CheckpointActor::AH_CheckpointActor()
@@ -19,6 +21,10 @@ AH_CheckpointActor::AH_CheckpointActor()
     );
 
     SetRootComponent(TriggerBox);
+
+    // 範囲を大きくする（X・Y・Z）
+    TriggerBox->SetBoxExtent(
+        FVector(150.0f, 150.0f, 150.0f));
 
     // プレイヤーを検知する設定
     TriggerBox->SetCollisionEnabled(
@@ -41,6 +47,39 @@ AH_CheckpointActor::AH_CheckpointActor()
         this,
         &AH_CheckpointActor::OnOverlapBegin
     );
+
+    NormalEffect = CreateDefaultSubobject<UNiagaraComponent>(
+        TEXT("NormalEffect"));
+
+    NormalEffect->SetupAttachment(TriggerBox);
+    NormalEffect->SetRelativeLocation(FVector(0, 0, 100));
+    NormalEffect->SetAutoActivate(false);
+
+    ActivatedEffect = CreateDefaultSubobject<UNiagaraComponent>(
+        TEXT("ActivatedEffect"));
+
+    ActivatedEffect->SetupAttachment(TriggerBox);
+    ActivatedEffect->SetRelativeLocation(FVector(0, 0, 100));
+    ActivatedEffect->SetAutoActivate(false);
+}
+
+void AH_CheckpointActor::BeginPlay()
+{
+    Super::BeginPlay();
+
+    // 触れる前のNiagaraを表示
+    if (NormalEffect)
+    {
+        NormalEffect->SetVisibility(true, true);
+        NormalEffect->Activate(true);
+    }
+
+    // 触れた後のNiagaraを非表示
+    if (ActivatedEffect)
+    {
+        ActivatedEffect->Deactivate();
+        ActivatedEffect->SetVisibility(false, true);
+    }
 }
 
 void AH_CheckpointActor::OnOverlapBegin(
@@ -58,27 +97,48 @@ void AH_CheckpointActor::OnOverlapBegin(
         return;
     }
 
+    // 一度起動したら繰り返さない
+    if (bIsActivated)
+    {
+        return;
+    }
+
+    // チェックポイントを起動済みにする
+    bIsActivated = true;
+
     // GameInstanceを取得
     UCheckpointGameInstance* GameInstance =
         Cast<UCheckpointGameInstance>(
             UGameplayStatics::GetGameInstance(this)
         );
 
-    if (!GameInstance)
+    // チェックポイントの位置を保存
+    if (GameInstance)
     {
-        return;
+        GameInstance->SavedCheckpointLocation =
+            GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
+
+        GameInstance->bHasCheckpoint = true;
+
+        UE_LOG(
+            LogTemp,
+            Warning,
+            TEXT("Checkpoint saved: %s"),
+            *GameInstance->SavedCheckpointLocation.ToString()
+        );
     }
 
-    // このチェックポイントの位置を保存
-    GameInstance->SavedCheckpointLocation =
-        GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
+    // 触れる前のNiagaraを消す
+    if (NormalEffect)
+    {
+        NormalEffect->Deactivate();
+        NormalEffect->SetVisibility(false, true);
+    }
 
-    GameInstance->bHasCheckpoint = true;
-
-    UE_LOG(
-        LogTemp,
-        Warning,
-        TEXT("Checkpoint saved: %s"),
-        *GameInstance->SavedCheckpointLocation.ToString()
-    );
+    // 触れた後のNiagaraを表示する
+    if (ActivatedEffect)
+    {
+        ActivatedEffect->SetVisibility(true, true);
+        ActivatedEffect->Activate(true);
+    }
 }
