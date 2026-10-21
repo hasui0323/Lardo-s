@@ -82,6 +82,7 @@ void AH_CheckpointActor::BeginPlay()
     }
 }
 
+
 void AH_CheckpointActor::OnOverlapBegin(
     UPrimitiveComponent* OverlappedComponent,
     AActor* OtherActor,
@@ -112,11 +113,16 @@ void AH_CheckpointActor::OnOverlapBegin(
             UGameplayStatics::GetGameInstance(this)
         );
 
-    // チェックポイントの位置を保存
+    // リスポーン地点を保存
     if (GameInstance)
     {
+        // チェックポイントの向きを基準にオフセットを適用
         GameInstance->SavedCheckpointLocation =
-            GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
+            GetActorLocation()
+            + GetActorRotation().RotateVector(RespawnOffset);
+
+        // チェックポイントの回転も保存
+        GameInstance->SavedCheckpointRotation = GetActorRotation();
 
         GameInstance->bHasCheckpoint = true;
 
@@ -135,7 +141,7 @@ void AH_CheckpointActor::OnOverlapBegin(
         NormalEffect->SetVisibility(false, true);
     }
 
-    // 触れた後のNiagaraを表示する
+    // 触れた後のNiagaraを表示
     if (ActivatedEffect)
     {
         ActivatedEffect->SetVisibility(true, true);

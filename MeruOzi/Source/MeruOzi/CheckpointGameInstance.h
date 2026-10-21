@@ -22,4 +22,8 @@ public:
     // チェックポイントが保存されているか
     UPROPERTY(BlueprintReadWrite, Category = "Checkpoint")
     bool bHasCheckpoint = false;
+
+    // 最後に通過したチェックポイントの回転
+    UPROPERTY(BlueprintReadWrite, Category = "Checkpoint")
+    FRotator SavedCheckpointRotation = FRotator::ZeroRotator;
 };

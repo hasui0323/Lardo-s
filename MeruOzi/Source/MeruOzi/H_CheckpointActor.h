@@ -54,4 +54,8 @@ protected:
 
     // チェックポイントが有効になったか
     bool bIsActivated = false;
+
+    // リスポーン地点のずらす量（チェックポイントを基準にする）
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Checkpoint")
+    FVector RespawnOffset = FVector(100.0f, 0.0f, 50.0f);
 };
