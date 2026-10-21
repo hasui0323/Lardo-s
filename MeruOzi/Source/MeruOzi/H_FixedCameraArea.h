@@ -12,6 +12,24 @@ class UBoxComponent;
 class UCameraComponent;
 class UNiagaraSystem;
 
+USTRUCT(BlueprintType)
+struct FCameraSpawnOption
+{
+    GENERATED_BODY()
+
+    // 出現させるオブジェクト
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<AActor> ObjectClass;
+
+    // 出現位置
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FVector SpawnLocation = FVector::ZeroVector;
+
+    // 出現時の向き
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FRotator SpawnRotation = FRotator::ZeroRotator;
+};
+
 UCLASS()
 class MERUOZI_API AH_FixedCameraArea : public AActor
 {
@@ -38,6 +56,25 @@ protected:
     // 光の柱のエフェクト
     UPROPERTY(EditAnywhere, Category = "Effect")
     UNiagaraSystem* LightPillarEffect;
+
+    // カメラ切り替え後に表示する操作ウィジェット
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> CameraControlWidgetClass;
+
+    UPROPERTY()
+    UUserWidget* CameraControlWidget = nullptr;
+
+    // ボタンごとの出現設定
+    UPROPERTY(EditAnywhere, Category = "Spawn")
+    TArray<FCameraSpawnOption> SpawnOptions;
+
+    // ボタンから呼び出す出現処理
+    UFUNCTION(BlueprintCallable, Category = "Spawn")
+    void SpawnObjectByIndex(int32 Index);
+
+    // 指定したボタンが使用済みか確認する
+    UFUNCTION(BlueprintPure, Category = "Spawn")
+    bool IsSpawnOptionUsed(int32 Index) const;
 
     // 範囲内にいるか
     bool bPlayerInRange = false;
@@ -84,4 +121,7 @@ protected:
     // 表示・非表示の処理
     void ShowPrompt();
     void HidePrompt();
+
+    // 生成済みのボタン番号
+    TSet<int32> SpawnedOptionIndices;
 };

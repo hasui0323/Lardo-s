@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "Engine/Engine.h"
+
 #include "H_FixedCameraArea.h"
 
 #include "Components/BoxComponent.h"
@@ -180,46 +182,38 @@ void AH_FixedCameraArea::SwitchCamera()
         // 固定カメラへ切り替える
         PC->SetViewTargetWithBlend(this, 0.5f);
 
-        // プレイヤーの操作を無効にする
+        // プレイヤーの移動・視点操作を無効化
         PC->SetIgnoreMoveInput(true);
         PC->SetIgnoreLookInput(true);
 
-        // ジャンプを含むキャラクターの移動を停止
-        ACharacter* PlayerCharacter =
-            Cast<ACharacter>(PlayerPawn);
+        // 既存の案内を消す
+        HidePrompt();
 
-        if (PlayerCharacter)
+        // マウスカーソルを表示してUIを操作可能にする
+        PC->bShowMouseCursor = true;
+
+        FInputModeGameAndUI InputMode;
+        PC->SetInputMode(InputMode);
+
+        // 操作ボタンを表示
+        if (CameraControlWidgetClass &&
+            !CameraControlWidget)
         {
-            UCharacterMovementComponent* Movement =
-                PlayerCharacter->GetCharacterMovement();
+            CameraControlWidget =
+                CreateWidget<UUserWidget>(
+                    PC, CameraControlWidgetClass);
 
-            // 地上にいる場合だけ移動を停止する
-            if (Movement->IsMovingOnGround())
+            if (CameraControlWidget)
             {
-                Movement->DisableMovement();
-            }
-            else
-            {
-                // 空中では落下を続ける
-                // 着地するまで移動モードを維持する
-                Movement->SetMovementMode(MOVE_Falling);
+                CameraControlWidget->AddToViewport();
             }
         }
-
-        // 案内を非表示
-        HidePrompt();
 
         bCameraFixed = true;
     }
     else
     {
         RestoreCamera();
-
-        // 範囲内なら案内を再表示
-        if (bPlayerInRange)
-        {
-            ShowPrompt();
-        }
     }
 }
 
@@ -228,14 +222,28 @@ void AH_FixedCameraArea::RestoreCamera()
     APlayerController* PC =
         UGameplayStatics::GetPlayerController(this, 0);
 
-    if (PC && PreviousViewTarget)
+    // 操作ボタンを削除
+    if (CameraControlWidget)
     {
-        PC->SetViewTargetWithBlend(
-            PreviousViewTarget, 0.5f);
+        CameraControlWidget->RemoveFromParent();
+        CameraControlWidget = nullptr;
+    }
 
-        // プレイヤーの操作を再び有効にする
+    if (PC)
+    {
+        if (PreviousViewTarget)
+        {
+            PC->SetViewTargetWithBlend(
+                PreviousViewTarget, 0.5f);
+        }
+
+        // プレイヤー操作を再び有効にする
         PC->SetIgnoreMoveInput(false);
         PC->SetIgnoreLookInput(false);
+
+        // マウスカーソルと入力モードを戻す
+        PC->bShowMouseCursor = false;
+        PC->SetInputMode(FInputModeGameOnly());
 
         // キャラクターの移動を再び有効にする
         APawn* PlayerPawn =
@@ -249,7 +257,8 @@ void AH_FixedCameraArea::RestoreCamera()
             UCharacterMovementComponent* Movement =
                 PlayerCharacter->GetCharacterMovement();
 
-            if (Movement)
+            if (Movement &&
+                Movement->MovementMode == MOVE_None)
             {
                 Movement->SetMovementMode(MOVE_Walking);
             }
@@ -286,7 +295,7 @@ void AH_FixedCameraArea::ShowPrompt()
     }
 }
 
-// Fキーの案内を非表示
+//Fキーの案内を非表示
 void AH_FixedCameraArea::HidePrompt()
 {
     if (PromptWidget)
@@ -296,4 +305,70 @@ void AH_FixedCameraArea::HidePrompt()
     }
 
     bPromptVisible = false;
+}
+
+void AH_FixedCameraArea::SpawnObjectByIndex(int32 Index)
+{
+    UE_LOG(LogTemp, Warning,
+        TEXT("SpawnObjectByIndex: Index=%d, AlreadyUsed=%d"),
+        Index,
+        SpawnedOptionIndices.Contains(Index) ? 1 : 0);
+
+    // 配列の範囲外なら終了
+    if (!SpawnOptions.IsValidIndex(Index))
+    {
+        return;
+    }
+
+    // このボタンですでに生成していたら終了
+    if (SpawnedOptionIndices.Contains(Index))
+    {
+        return;
+    }
+
+    const FCameraSpawnOption& Option = SpawnOptions[Index];
+
+    if (!Option.ObjectClass)
+    {
+        return;
+    }
+
+    UWorld* World = GetWorld();
+
+    if (!World)
+    {
+        return;
+    }
+
+    // 生成前に使用済みとして登録
+    SpawnedOptionIndices.Add(Index);
+
+    AActor* SpawnedObject = World->SpawnActor<AActor>(
+        Option.ObjectClass,
+        Option.SpawnLocation,
+        Option.SpawnRotation
+    );
+
+    // 生成に失敗した場合は、もう一度押せるようにする
+    if (!SpawnedObject)
+    {
+        SpawnedOptionIndices.Remove(Index);
+    }
+    UE_LOG(LogTemp, Warning,
+        TEXT("Spawn Index=%d, Location=%s, Class=%s"),
+        Index,
+        *Option.SpawnLocation.ToString(),
+        *GetNameSafe(Option.ObjectClass.Get()));
+}
+
+bool AH_FixedCameraArea::IsSpawnOptionUsed(int32 Index) const
+{
+    const bool bUsed = SpawnedOptionIndices.Contains(Index);
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("IsSpawnOptionUsed: Index=%d, Used=%d"),
+        Index,
+        bUsed ? 1 : 0);
+
+    return bUsed;
 }
