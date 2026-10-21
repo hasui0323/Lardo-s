@@ -74,6 +74,17 @@ public:
 
     //--------------------------------------------------
 
+    //--------------------------------------------------
+    // 残機（初期値は3）
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
+    int32 Life = 3;
+
+    // 残機を増やす関数
+    UFUNCTION(BlueprintCallable, Category = "Player")
+    void AddLife(int32 Amount);
+
+    //--------------------------------------------------
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

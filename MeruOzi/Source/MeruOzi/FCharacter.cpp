@@ -193,3 +193,11 @@ void AFCharacter::AddGauge(float Amount)
         GaugePercent * 100.0f
     );
 }
+
+//プレイヤーの残機
+void AFCharacter::AddLife(int32 Amount)
+{
+    Life += Amount;
+
+    UE_LOG(LogTemp, Warning, TEXT("残機: %d"), Life);
+}

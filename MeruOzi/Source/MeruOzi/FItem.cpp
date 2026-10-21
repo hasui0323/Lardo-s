@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FCharacter.h"
-
 #include "FItem.h"
+#include "FCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
 
@@ -54,10 +53,25 @@ void AFItem::OnOverlapBegin(
 
     if (Player)
     {
-        // ゲージを20%増やす
-        Player->AddGauge(0.2f);
 
-        // アイテムを消す
+            ////ゲージを20%増やす
+            //Player->AddGauge(0.2f);
+
+        // アイテムの種類によって処理を分ける
+        switch (ItemType)
+        {
+        case EItemType::Gauge:
+            //ゲージを20%増やす
+            Player->AddGauge(0.2f);
+            break;
+
+        case EItemType::Life:
+            //残機を1増やす
+            Player->AddLife(1);
+            break;
+        }
+
+        //アイテムを消す
         Destroy();
     }
 }
