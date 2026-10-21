@@ -184,6 +184,28 @@ void AH_FixedCameraArea::SwitchCamera()
         PC->SetIgnoreMoveInput(true);
         PC->SetIgnoreLookInput(true);
 
+        // ジャンプを含むキャラクターの移動を停止
+        ACharacter* PlayerCharacter =
+            Cast<ACharacter>(PlayerPawn);
+
+        if (PlayerCharacter)
+        {
+            UCharacterMovementComponent* Movement =
+                PlayerCharacter->GetCharacterMovement();
+
+            // 地上にいる場合だけ移動を停止する
+            if (Movement->IsMovingOnGround())
+            {
+                Movement->DisableMovement();
+            }
+            else
+            {
+                // 空中では落下を続ける
+                // 着地するまで移動モードを維持する
+                Movement->SetMovementMode(MOVE_Falling);
+            }
+        }
+
         // 案内を非表示
         HidePrompt();
 
@@ -214,6 +236,24 @@ void AH_FixedCameraArea::RestoreCamera()
         // プレイヤーの操作を再び有効にする
         PC->SetIgnoreMoveInput(false);
         PC->SetIgnoreLookInput(false);
+
+        // キャラクターの移動を再び有効にする
+        APawn* PlayerPawn =
+            UGameplayStatics::GetPlayerPawn(this, 0);
+
+        ACharacter* PlayerCharacter =
+            Cast<ACharacter>(PlayerPawn);
+
+        if (PlayerCharacter)
+        {
+            UCharacterMovementComponent* Movement =
+                PlayerCharacter->GetCharacterMovement();
+
+            if (Movement)
+            {
+                Movement->SetMovementMode(MOVE_Walking);
+            }
+        }
     }
 
     PreviousViewTarget = nullptr;
