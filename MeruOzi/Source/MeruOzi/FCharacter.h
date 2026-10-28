@@ -72,6 +72,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ItemGauge")
     void AddGauge(float Amount);
 
+    // ƒQ[ƒW‚ğÁ”ï‚·‚éBÁ”ï‚Å‚«‚½‚ç true ‚ğ•Ô‚·
+    UFUNCTION(BlueprintCallable, Category = "ItemGauge")
+    bool TryUseGauge(float Amount);
+
     //--------------------------------------------------
 
     //--------------------------------------------------

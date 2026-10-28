@@ -201,3 +201,81 @@ void AFCharacter::AddLife(int32 Amount)
 
     UE_LOG(LogTemp, Warning, TEXT("残機: %d"), Life);
 }
+//-----------------------------------------
+
+// ゲージを消費する処理
+bool AFCharacter::TryUseGauge(float Amount)
+{
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("消費前のゲージ: %f"),
+        GaugePercent
+    );
+
+    // ゲージが足りない場合は消費しない
+    if (GaugePercent < Amount)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ゲージ不足！"));
+        return false;
+    }
+
+    // ゲージを消費
+    GaugePercent -= Amount;
+
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("消費後のゲージ: %f"),
+        GaugePercent
+    );
+
+    //// ゲージを消費する
+    //GaugePercent = FMath::Clamp(
+    //    GaugePercent - Amount,
+    //    0.0f,
+    //    1.0f
+    //);
+
+    //UE_LOG(
+    //    LogTemp,
+    //    Warning,
+    //    TEXT("Gauge: %f"),
+    //    GaugePercent * 100.0f
+    //);
+
+    return true;
+}
+
+//bool AFCharacter::TryUseGauge(float Amount)
+//{
+//    UE_LOG(
+//        LogTemp,
+//        Warning,
+//        TEXT("TryUseGauge 呼び出し！ 消費前: %f"),
+//        GaugePercent
+//    );
+//
+//    if (GaugePercent < Amount)
+//    {
+//        UE_LOG(
+//            LogTemp,
+//            Warning,
+//            TEXT("ゲージ不足！必要量: %f"),
+//            Amount
+//        );
+//
+//        return false;
+//    }
+//
+//    GaugePercent -= Amount;
+//
+//    UE_LOG(
+//        LogTemp,
+//        Warning,
+//        TEXT("TryUseGauge 成功！ 消費後: %f"),
+//        GaugePercent
+//    );
+//
+//    return true;
+//}
