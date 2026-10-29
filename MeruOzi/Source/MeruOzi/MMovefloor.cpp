@@ -30,6 +30,12 @@ void AMMovefloor::Tick(float DeltaTime)
 	MovePlatform(DeltaTime);
 }
 
+void AMMovefloor::StartReturning()
+{
+	bReturning = true;
+	WaitTimer = 0.f; // ’[‚Å‘Ò‹@’†‚Å‚à‚·‚®–ß‚èŽn‚ß‚é
+}
+
 void AMMovefloor::MovePlatform(float DeltaTime)
 {
 	FVector CurrentLocation = GetActorLocation();

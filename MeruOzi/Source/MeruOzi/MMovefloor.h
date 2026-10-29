@@ -37,9 +37,20 @@ private:
 
     // 移動方向 (正規化されたベクトル)
     UPROPERTY(EditAnywhere, Category = "Movement")
-    FVector MoveDirection = FVector(1, 0, 0);
+  FVector MoveDirection = FVector(1, 0, 0);
+    //端についてから折り返し時間
+    UPROPERTY(EditAnywhere, Category = "Platform", meta = (ClampMin = "0.0"))
+    float WaitTime = 1.f;
+
+  
 
     FVector StartLocation;
 
+    bool bReturning = false;//床が戻っているか
+    bool bMovingToEnd = true;//往復時の変更方向
+
+    float WaitTimer = 0.f;//端に到達して停止している時間の残り
+
     void MovePlatform(float DeltaTime);  //
+    void StartReturning();
 };

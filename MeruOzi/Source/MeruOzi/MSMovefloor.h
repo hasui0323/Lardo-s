@@ -51,12 +51,15 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Platform", meta = (ClampMin = "0.0"))
     float MoveDistance = 300.f;
 
+    //ˆÚ“®‘¬“x
     UPROPERTY(EditAnywhere, Category = "Platform", meta = (ClampMin = "1.0"))
     float Speed = 200.f;
+
 
     UPROPERTY(EditAnywhere, Category = "Platform")
     bool bPingPong = true;
 
+    //’[‚É‚Â‚¢‚Ä‚©‚çÜ‚è•Ô‚·‚Ü‚Å‚ÌŠÔ
     UPROPERTY(EditAnywhere, Category = "Platform", meta = (ClampMin = "0.0"))
     float WaitTime = 1.f;
 
