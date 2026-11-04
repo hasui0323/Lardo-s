@@ -193,14 +193,24 @@ void AFCharacter::AddGauge(float Amount)
         GaugePercent * 100.0f
     );
 }
+//-----------------------------------------
 
-//プレイヤーの残機
+//プレイヤーの残機を増やす
 void AFCharacter::AddLife(int32 Amount)
 {
     Life += Amount;
 
     UE_LOG(LogTemp, Warning, TEXT("残機: %d"), Life);
 }
+
+//プレイヤーの残機を減らす
+void AFCharacter::DecreaseLife()
+{
+    Life = FMath::Max(0, Life - 1);
+
+    UE_LOG(LogTemp, Warning, TEXT("残機: %d"), Life);
+}
+
 //-----------------------------------------
 
 // ゲージを消費する処理
@@ -229,20 +239,6 @@ bool AFCharacter::TryUseGauge(float Amount)
         TEXT("消費後のゲージ: %f"),
         GaugePercent
     );
-
-    //// ゲージを消費する
-    //GaugePercent = FMath::Clamp(
-    //    GaugePercent - Amount,
-    //    0.0f,
-    //    1.0f
-    //);
-
-    //UE_LOG(
-    //    LogTemp,
-    //    Warning,
-    //    TEXT("Gauge: %f"),
-    //    GaugePercent * 100.0f
-    //);
 
     return true;
 }

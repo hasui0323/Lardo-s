@@ -87,6 +87,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Player")
     void AddLife(int32 Amount);
 
+    // écã@Çå∏ÇÁÇ∑ä÷êî
+    UFUNCTION(BlueprintCallable, Category = "Player")
+    void DecreaseLife();
+
     //--------------------------------------------------
 
 public:	
