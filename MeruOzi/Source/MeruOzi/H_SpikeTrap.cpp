@@ -3,6 +3,8 @@
 
 #include "H_SpikeTrap.h"
 
+#include "FCharacter.h"
+
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -84,6 +86,9 @@ void AH_SpikeTrap::BeginPlay()
 
 void AH_SpikeTrap::ExtendSpikes()
 {
+    // 新しい攻撃開始時にダメージ判定をリセット
+    bHasDamagedPlayer = false;
+
     // とげを飛び出させる
     SpikeMesh->SetRelativeLocation(ExtendedLocation);
 
@@ -135,8 +140,8 @@ void AH_SpikeTrap::RetractSpikes()
 
 void AH_SpikeTrap::CheckDamage()
 {
-    // とげが出ていなければ何もしない
-    if (!bSpikeActive)
+    // とげが出ていない、または既にダメージを与えた場合は終了
+    if (!bSpikeActive || bHasDamagedPlayer)
     {
         return;
     }
@@ -157,19 +162,37 @@ void AH_SpikeTrap::CheckDamage()
             continue;
         }
 
+        // AFCharacterにキャスト
+        AFCharacter* FPlayer = Cast<AFCharacter>(Player);
+
+        if (!FPlayer)
+        {
+            continue;
+        }
+
+        // この攻撃中はダメージを1回だけにする
+        bHasDamagedPlayer = true;
+
+        // 残機を1減らす
+        FPlayer->DecreaseLife();
+
         // チェックポイント情報を取得
         UCheckpointGameInstance* GameInstance =
             Cast<UCheckpointGameInstance>(
                 UGameplayStatics::GetGameInstance(this));
 
-        // 復活する位置を決める
+        // 復活する位置と向きを決める
         FVector RespawnLocation = PlayerStartLocation;
+        FRotator RespawnRotation = PlayerStartRotation;
 
         if (GameInstance && GameInstance->bHasCheckpoint)
         {
             // 最後に通過したチェックポイントを使用
             RespawnLocation =
                 GameInstance->SavedCheckpointLocation;
+
+            RespawnRotation =
+                GameInstance->SavedCheckpointRotation;
         }
 
         // プレイヤーの移動を停止
@@ -186,10 +209,8 @@ void AH_SpikeTrap::CheckDamage()
             nullptr,
             ETeleportType::TeleportPhysics);
 
-        // プレイヤーの向きを初期状態に戻す
-        // 向きもチェックポイントごとに保存したい場合は、
-        // 別途Rotationの保存処理を追加する
-        Player->SetActorRotation(PlayerStartRotation);
+        // 保存した向きへ戻す
+        Player->SetActorRotation(RespawnRotation);
 
         // 1回の判定で処理を終了
         return;

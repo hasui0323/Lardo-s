@@ -4,6 +4,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
+#include "FCharacter.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PawnMovementComponent.h"
@@ -277,6 +279,14 @@ void AH_FlyingSpike::HandlePlayerHit()
         return;
     }
 
+    // AFCharacterにキャストして残機を減らす
+    AFCharacter* Player = Cast<AFCharacter>(PlayerPawn);
+
+    if (Player)
+    {
+        Player->DecreaseLife();
+    }
+
     // 初期地点を戻り先にする
     FVector RespawnLocation = InitialPlayerLocation;
     FRotator RespawnRotation = InitialPlayerRotation;
@@ -294,12 +304,13 @@ void AH_FlyingSpike::HandlePlayerHit()
         RespawnRotation = GameInstance->SavedCheckpointRotation;
     }
 
-    // 移動を停止してプレイヤーを戻す
+    // 移動を停止
     if (PlayerPawn->GetMovementComponent())
     {
         PlayerPawn->GetMovementComponent()->StopMovementImmediately();
     }
 
+    // 保存した位置へ戻す
     PlayerPawn->SetActorLocation(
         RespawnLocation,
         false,
@@ -307,5 +318,6 @@ void AH_FlyingSpike::HandlePlayerHit()
         ETeleportType::TeleportPhysics
     );
 
+    // 保存した向きへ戻す
     PlayerPawn->SetActorRotation(RespawnRotation);
 }

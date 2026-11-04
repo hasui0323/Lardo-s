@@ -74,4 +74,7 @@ protected:
 
     // プレイヤーの初期回転
     FRotator PlayerStartRotation;
+
+    // この攻撃中にプレイヤーへダメージを与えたか
+    bool bHasDamagedPlayer = false;
 };
