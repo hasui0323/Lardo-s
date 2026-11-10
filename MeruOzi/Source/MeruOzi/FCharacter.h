@@ -12,6 +12,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class UUserWidget;
 
 UCLASS()
 class MERUOZI_API AFCharacter : public ACharacter
@@ -99,6 +100,14 @@ public:
 
     // ゲームオーバー処理
     void GameOver();
+
+    // ゲームオーバーWidget
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GameOver")
+    TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+    // 表示中のWidget
+    UPROPERTY()
+    TObjectPtr<UUserWidget> GameOverWidget;
 
     //-----------------------------------------------------
    

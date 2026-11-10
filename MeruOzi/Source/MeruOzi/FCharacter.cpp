@@ -3,6 +3,8 @@
 
 #include "FCharacter.h"
 
+#include "Blueprint/UserWidget.h"
+
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -322,15 +324,44 @@ void AFCharacter::GameOver()
     // ジャンプ停止
     StopJumping();
 
-    // プレイヤー操作停止
     APlayerController* PC =
         Cast<APlayerController>(Controller);
 
     if (PC)
     {
+        // プレイヤー操作停止
         DisableInput(PC);
         PC->SetIgnoreMoveInput(true);
         PC->SetIgnoreLookInput(true);
+
+        // マウスカーソル表示
+        PC->bShowMouseCursor = true;
+
+        // ゲームオーバーWidgetを生成
+        if (GameOverWidgetClass)
+        {
+            GameOverWidget = CreateWidget<UUserWidget>(
+                PC,
+                GameOverWidgetClass
+            );
+
+            if (GameOverWidget)
+            {
+                GameOverWidget->AddToViewport();
+
+                // UI操作に切り替える
+                FInputModeUIOnly InputMode;
+                PC->SetInputMode(InputMode);
+            }
+        }
+        else
+        {
+            UE_LOG(
+                LogTemp,
+                Error,
+                TEXT("GameOverWidgetClass is not set")
+            );
+        }
     }
 
     UE_LOG(LogTemp, Warning, TEXT("GAME OVER"));
