@@ -22,6 +22,8 @@
 
 #include "Blueprint/UserWidget.h"
 
+#include "H_CameraControlWidgetBase.h"
+
 // Sets default values
 AH_FixedCameraArea::AH_FixedCameraArea()
 {
@@ -199,12 +201,24 @@ void AH_FixedCameraArea::SwitchCamera()
         if (CameraControlWidgetClass &&
             !CameraControlWidget)
         {
+            // 操作ボタンのウィジェットを生成
             CameraControlWidget =
                 CreateWidget<UUserWidget>(
                     PC, CameraControlWidgetClass);
 
             if (CameraControlWidget)
             {
+                // 専用ウィジェットクラスに変換
+                UH_CameraControlWidgetBase* ControlWidget =
+                    Cast<UH_CameraControlWidgetBase>(CameraControlWidget);
+
+                if (ControlWidget)
+                {
+                    // このエリア自身をウィジェットに渡す
+                    ControlWidget->SetFixedCameraAreaRef(this);
+                }
+
+                // ウィジェットを画面に表示
                 CameraControlWidget->AddToViewport();
             }
         }
