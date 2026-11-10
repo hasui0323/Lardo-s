@@ -14,6 +14,8 @@
 #include "InputMappingContext.h"
 #include "Engine/LocalPlayer.h"
 
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 AFCharacter::AFCharacter()
 {
@@ -168,7 +170,22 @@ void AFCharacter::Look(const FInputActionValue& Value)
 //ジャンプを開始する処理
 void AFCharacter::StartJump()
 {
+    // ジャンプできる状態か確認
+    if (!CanJump())
+    {
+        return;
+    }
+
     Jump();
+
+    // ジャンプ効果音を再生
+    if (JumpSound)
+    {
+        UGameplayStatics::PlaySound2D(
+            this,
+            JumpSound
+        );
+    }
 }
 
 //ジャンプを終了する処理

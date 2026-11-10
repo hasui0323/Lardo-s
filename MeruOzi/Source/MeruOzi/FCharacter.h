@@ -101,7 +101,13 @@ public:
     void GameOver();
 
     //-----------------------------------------------------
+   
+    // Œø‰Ê‰¹
+    UPROPERTY(EditAnywhere, Category = "Sound")
+    USoundBase* JumpSound;
+   
 
+    //-----------------------------------------------------
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
