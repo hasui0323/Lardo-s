@@ -93,6 +93,15 @@ public:
 
     //--------------------------------------------------
 
+    // ゲームオーバー状態
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+    bool bIsDead = false;
+
+    // ゲームオーバー処理
+    void GameOver();
+
+    //-----------------------------------------------------
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

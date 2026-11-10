@@ -206,9 +206,21 @@ void AFCharacter::AddLife(int32 Amount)
 //プレイヤーの残機を減らす
 void AFCharacter::DecreaseLife()
 {
+    // ゲームオーバー後は処理しない
+    if (bIsDead)
+    {
+        return;
+    }
+
     Life = FMath::Max(0, Life - 1);
 
     UE_LOG(LogTemp, Warning, TEXT("残機: %d"), Life);
+
+    // 残機が0になったらゲームオーバー
+    if (Life <= 0)
+    {
+        GameOver();
+    }
 }
 
 //-----------------------------------------
@@ -275,3 +287,34 @@ bool AFCharacter::TryUseGauge(float Amount)
 //
 //    return true;
 //}
+
+//ゲームオーバー処理
+void AFCharacter::GameOver()
+{
+    if (bIsDead)
+    {
+        return;
+    }
+
+    bIsDead = true;
+
+    // 移動停止
+    GetCharacterMovement()->StopMovementImmediately();
+    GetCharacterMovement()->DisableMovement();
+
+    // ジャンプ停止
+    StopJumping();
+
+    // プレイヤー操作停止
+    APlayerController* PC =
+        Cast<APlayerController>(Controller);
+
+    if (PC)
+    {
+        DisableInput(PC);
+        PC->SetIgnoreMoveInput(true);
+        PC->SetIgnoreLookInput(true);
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("GAME OVER"));
+}
