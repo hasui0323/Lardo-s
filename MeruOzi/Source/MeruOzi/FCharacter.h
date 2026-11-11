@@ -115,6 +115,12 @@ public:
     UPROPERTY(EditAnywhere, Category = "Sound")
     USoundBase* JumpSound;
    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundBase* ItemGetSound;    // ƒAƒCƒeƒ€æ“¾‰¹
+
+
+    // Œø‰Ê‰¹‚ğÄ¶‚·‚éŠÖ”
+    void PlaySE(USoundBase* Sound);
 
     //-----------------------------------------------------
 public:	

@@ -180,14 +180,8 @@ void AFCharacter::StartJump()
 
     Jump();
 
-    // ジャンプ効果音を再生
-    if (JumpSound)
-    {
-        UGameplayStatics::PlaySound2D(
-            this,
-            JumpSound
-        );
-    }
+    // ジャンプ音
+    PlaySE(JumpSound);
 }
 
 //ジャンプを終了する処理
@@ -274,6 +268,15 @@ bool AFCharacter::TryUseGauge(float Amount)
     return true;
 }
 
+//------------------------------------------------------------------
+// 効果音を再生する
+void AFCharacter::PlaySE(USoundBase* Sound)
+{
+    if (Sound)
+    {
+        UGameplayStatics::PlaySound2D(this, Sound);
+    }
+}
 //bool AFCharacter::TryUseGauge(float Amount)
 //{
 //    UE_LOG(
