@@ -16,6 +16,7 @@
 #include "InputMappingContext.h"
 #include "Engine/LocalPlayer.h"
 
+#include "CheckpointGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -346,5 +347,18 @@ void AFCharacter::GameOver()
         {
             GameOverWidget->AddToViewport();
         }
+    }
+
+    // 中継地点の情報をリセット
+    UCheckpointGameInstance* GameInstance =
+        Cast<UCheckpointGameInstance>(
+            UGameplayStatics::GetGameInstance(this)
+        );
+
+    if (GameInstance)
+    {
+        GameInstance->bHasCheckpoint = false;
+        GameInstance->SavedCheckpointLocation = FVector::ZeroVector;
+        GameInstance->SavedCheckpointRotation = FRotator::ZeroRotator;
     }
 }
