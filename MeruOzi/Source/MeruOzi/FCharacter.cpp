@@ -322,59 +322,29 @@ void AFCharacter::PlaySE(USoundBase* Sound)
 //ゲームオーバー処理
 void AFCharacter::GameOver()
 {
-    if (bIsDead)
-    {
-        return;
-    }
+    if (bIsDead) return;
 
     bIsDead = true;
 
-    // 移動停止
-    GetCharacterMovement()->StopMovementImmediately();
+    // プレイヤーの操作を停止
     GetCharacterMovement()->DisableMovement();
 
-    // ジャンプ停止
-    StopJumping();
-
     APlayerController* PC =
-        Cast<APlayerController>(Controller);
+        UGameplayStatics::GetPlayerController(this, 0);
 
     if (PC)
     {
-        // プレイヤー操作停止
         DisableInput(PC);
-        PC->SetIgnoreMoveInput(true);
-        PC->SetIgnoreLookInput(true);
-
-        // マウスカーソル表示
-        PC->bShowMouseCursor = true;
-
-        // ゲームオーバーWidgetを生成
-        if (GameOverWidgetClass)
-        {
-            GameOverWidget = CreateWidget<UUserWidget>(
-                PC,
-                GameOverWidgetClass
-            );
-
-            if (GameOverWidget)
-            {
-                GameOverWidget->AddToViewport();
-
-                // UI操作に切り替える
-                FInputModeUIOnly InputMode;
-                PC->SetInputMode(InputMode);
-            }
-        }
-        else
-        {
-            UE_LOG(
-                LogTemp,
-                Error,
-                TEXT("GameOverWidgetClass is not set")
-            );
-        }
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("GAME OVER"));
+    // GameOver UIを表示
+    if (GameOverWidgetClass)
+    {
+        GameOverWidget = CreateWidget<UUserWidget>(PC, GameOverWidgetClass);
+
+        if (GameOverWidget)
+        {
+            GameOverWidget->AddToViewport();
+        }
+    }
 }
