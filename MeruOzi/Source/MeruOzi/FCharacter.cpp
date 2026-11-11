@@ -205,6 +205,9 @@ void AFCharacter::AddGauge(float Amount)
         TEXT("Gauge: %f"),
         GaugePercent * 100.0f
     );
+
+    // アイテム入手音
+    PlaySE(ItemGetSound);
 }
 //-----------------------------------------
 
@@ -214,11 +217,17 @@ void AFCharacter::AddLife(int32 Amount)
     Life += Amount;
 
     UE_LOG(LogTemp, Warning, TEXT("残機: %d"), Life);
+
+    // アイテム入手音
+    PlaySE(LifeItemGetSound);
 }
 
 //プレイヤーの残機を減らす
 void AFCharacter::DecreaseLife()
 {
+    // ダメージ音
+    PlaySE(DamageSound);
+
     // ゲームオーバー後は処理しない
     if (bIsDead)
     {

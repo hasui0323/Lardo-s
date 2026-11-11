@@ -118,6 +118,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
     USoundBase* ItemGetSound;    // アイテム取得音
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundBase* LifeItemGetSound;    // アイテム取得音
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundBase* DamageSound;     // ダメージ音
 
     // 効果音を再生する関数
     void PlaySE(USoundBase* Sound);
