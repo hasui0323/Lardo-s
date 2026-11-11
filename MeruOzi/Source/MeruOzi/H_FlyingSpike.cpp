@@ -45,16 +45,35 @@ void AH_FlyingSpike::BeginPlay()
     // 飛んでいるとげは発射処理を行わない
     if (!bIsProjectile)
     {
+        UCheckpointGameInstance* GameInstance =
+            Cast<UCheckpointGameInstance>(
+                UGameplayStatics::GetGameInstance(this)
+            );
+
         APawn* PlayerPawn =
             UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-        if (PlayerPawn)
+        // GameInstanceに初期位置がまだ保存されていない場合
+        if (GameInstance &&
+            !GameInstance->bHasInitialPlayerLocation &&
+            PlayerPawn)
         {
-            InitialPlayerLocation = PlayerPawn->GetActorLocation();
-            InitialPlayerRotation = PlayerPawn->GetActorRotation();
-            bInitialPlayerLocationSaved = true;
+            GameInstance->InitialPlayerLocation =
+                PlayerPawn->GetActorLocation();
+
+            GameInstance->InitialPlayerRotation =
+                PlayerPawn->GetActorRotation();
+
+            GameInstance->bHasInitialPlayerLocation = true;
+
+            UE_LOG(
+                LogTemp,
+                Warning,
+                TEXT("Initial Position Saved: %s"),
+                *GameInstance->InitialPlayerLocation.ToString()
+            );
         }
-        //最初のとげを発射するタイマーを設定
+
         ScheduleNextShot();
     }
 }
@@ -287,21 +306,32 @@ void AH_FlyingSpike::HandlePlayerHit()
         Player->DecreaseLife();
     }
 
-    // 初期地点を戻り先にする
-    FVector RespawnLocation = InitialPlayerLocation;
-    FRotator RespawnRotation = InitialPlayerRotation;
-
-    // チェックポイント情報を取得
+    // GameInstanceを取得
     UCheckpointGameInstance* GameInstance =
         Cast<UCheckpointGameInstance>(
             UGameplayStatics::GetGameInstance(this)
         );
 
-    // チェックポイントを通過済みなら、その位置と回転を使う
-    if (GameInstance && GameInstance->bHasCheckpoint)
+    if (!GameInstance)
     {
-        RespawnLocation = GameInstance->SavedCheckpointLocation;
-        RespawnRotation = GameInstance->SavedCheckpointRotation;
+        return;
+    }
+
+    // 初期位置を取得
+    FVector RespawnLocation =
+        GameInstance->InitialPlayerLocation;
+
+    FRotator RespawnRotation =
+        GameInstance->InitialPlayerRotation;
+
+    // チェックポイント通過済みならチェックポイントを優先
+    if (GameInstance->bHasCheckpoint)
+    {
+        RespawnLocation =
+            GameInstance->SavedCheckpointLocation;
+
+        RespawnRotation =
+            GameInstance->SavedCheckpointRotation;
     }
 
     // 移動を停止
@@ -320,4 +350,11 @@ void AH_FlyingSpike::HandlePlayerHit()
 
     // 保存した向きへ戻す
     PlayerPawn->SetActorRotation(RespawnRotation);
+
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("Respawn Location: %s"),
+        *RespawnLocation.ToString()
+    );
 }

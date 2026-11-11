@@ -17,22 +17,21 @@ void ATitleActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    ////プレイヤーコントローラーを取得
-    //APlayerController* PlayerController =
-    //    UGameplayStatics::GetPlayerController(this, 0);
+    // PlayerControllerを取得
+    APlayerController* PC =
+        UGameplayStatics::GetPlayerController(this, 0);
 
-    //if (PlayerController)
-    //{
-    //    //マウスカーソルを非表示する
-    //    PlayerController->bShowMouseCursor = false;
+    if (PC)
+    {
+        // ゲーム入力に戻す
+        PC->SetInputMode(FInputModeGameOnly());
 
-    //    //ゲーム画面の入力を受け取れるようにする
-    //    FInputModeGameAndUI InputMode;
-    //    PlayerController->SetInputMode(InputMode);
+        // マウスカーソルを非表示
+        PC->bShowMouseCursor = false;
 
-    //    //左クリックを検知できるようにする
-    //    EnableInput(PlayerController);
-    //}
+        // TitleActorで入力を受け取れるようにする
+        EnableInput(PC);
+    }
 }
 
 void ATitleActor::Tick(float DeltaTime)

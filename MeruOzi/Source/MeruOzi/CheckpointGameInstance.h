@@ -26,4 +26,16 @@ public:
     // 最後に通過したチェックポイントの回転
     UPROPERTY(BlueprintReadWrite, Category = "Checkpoint")
     FRotator SavedCheckpointRotation = FRotator::ZeroRotator;
+
+    // ゲーム開始時のプレイヤー初期位置
+    UPROPERTY()
+    FVector InitialPlayerLocation = FVector::ZeroVector;
+
+    // ゲーム開始時のプレイヤー初期回転
+    UPROPERTY()
+    FRotator InitialPlayerRotation = FRotator::ZeroRotator;
+
+    // 初期位置を保存したか
+    UPROPERTY()
+    bool bHasInitialPlayerLocation = false;
 };

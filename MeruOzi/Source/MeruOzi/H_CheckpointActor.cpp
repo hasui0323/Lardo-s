@@ -116,10 +116,14 @@ void AH_CheckpointActor::OnOverlapBegin(
     // リスポーン地点を保存
     if (GameInstance)
     {
-        // チェックポイントの向きを基準にオフセットを適用
-        GameInstance->SavedCheckpointLocation =
+        FVector RespawnLocation =
             GetActorLocation()
             + GetActorRotation().RotateVector(RespawnOffset);
+
+        // ワールド座標で高さを上げる
+        RespawnLocation.Z = GetActorLocation().Z + 100.0f;
+
+        GameInstance->SavedCheckpointLocation = RespawnLocation;
 
         // チェックポイントの回転も保存
         GameInstance->SavedCheckpointRotation = GetActorRotation();
