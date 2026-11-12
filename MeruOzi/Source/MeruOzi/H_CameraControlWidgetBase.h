@@ -1,29 +1,43 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "H_CameraControlWidgetBase.generated.h"
 
-// 固定カメラエリアの前方宣言
 class AH_FixedCameraArea;
+class UButton;
 
-/**
- * 
- */
 UCLASS()
 class MERUOZI_API UH_CameraControlWidgetBase : public UUserWidget
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
 
-    // 固定カメラエリアの参照
     UPROPERTY(BlueprintReadOnly, Category = "Camera")
     AH_FixedCameraArea* FixedCameraAreaRef = nullptr;
 
-    // 固定カメラエリアの参照を設定
     UFUNCTION(BlueprintCallable, Category = "Camera")
     void SetFixedCameraAreaRef(AH_FixedCameraArea* Area);
+
+protected:
+
+    virtual void NativeConstruct() override;
+
+    UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "UI")
+    UButton* Button_A;
+
+    UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "UI")
+    UButton* Button_B;
+
+    UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "UI")
+    UButton* Button_C;
+
+    UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "UI")
+    UButton* Button_D;
+
+    void UpdateSpawnButtonVisibility();
 };

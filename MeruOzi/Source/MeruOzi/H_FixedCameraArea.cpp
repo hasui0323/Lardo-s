@@ -214,8 +214,15 @@ void AH_FixedCameraArea::SwitchCamera()
 
                 if (ControlWidget)
                 {
-                    // このエリア自身をウィジェットに渡す
+                    UE_LOG(LogTemp, Warning,
+                        TEXT("ControlWidget Cast SUCCESS"));
+
                     ControlWidget->SetFixedCameraAreaRef(this);
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Error,
+                        TEXT("ControlWidget Cast FAILED"));
                 }
 
                 // ウィジェットを画面に表示
@@ -385,4 +392,27 @@ bool AH_FixedCameraArea::IsSpawnOptionUsed(int32 Index) const
         bUsed ? 1 : 0);
 
     return bUsed;
+}
+
+// スポーン設定があるか確認
+bool AH_FixedCameraArea::HasSpawnOption(int32 Index) const
+{
+    if (!SpawnOptions.IsValidIndex(Index))
+    {
+        UE_LOG(LogTemp, Warning,
+            TEXT("Index %d : Invalid"), Index);
+
+        return false;
+    }
+
+    bool bHasClass =
+        SpawnOptions[Index].ObjectClass != nullptr;
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Index %d : HasClass = %d, Class = %s"),
+        Index,
+        bHasClass ? 1 : 0,
+        *GetNameSafe(SpawnOptions[Index].ObjectClass.Get()));
+
+    return bHasClass;
 }

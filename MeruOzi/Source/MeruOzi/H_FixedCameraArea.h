@@ -38,6 +38,10 @@ class MERUOZI_API AH_FixedCameraArea : public AActor
 public:
     AH_FixedCameraArea();
 
+    // スポーン設定があるか確認
+    UFUNCTION(BlueprintPure, Category = "Spawn")
+    bool HasSpawnOption(int32 Index) const;
+
 protected:
     virtual void BeginPlay() override;
 
