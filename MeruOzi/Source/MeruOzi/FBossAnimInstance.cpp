@@ -3,3 +3,14 @@
 
 #include "FBossAnimInstance.h"
 
+void UFBossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+    Super::NativeUpdateAnimation(DeltaSeconds);
+
+    // ダウンアニメーションが終了したら
+    if (bIsPlayingDown)
+    {
+        // Downステートの再生が終了したかは
+        // ABP側から通知を受け取って判定する
+    }
+}

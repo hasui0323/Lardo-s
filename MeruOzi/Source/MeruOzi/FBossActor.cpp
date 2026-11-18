@@ -125,10 +125,11 @@ void AFBossActor::Interact(AActor* Player)
     UFBossAnimInstance* AnimInstance =
         Cast<UFBossAnimInstance>(BossMesh->GetAnimInstance());
 
-    // ダウン状態にする
-    if (AnimInstance)
+    // アニメーションが再生中でなければダウンさせる
+    if (AnimInstance && !AnimInstance->bIsDown)
     {
         AnimInstance->bIsDown = true;
+       // AnimInstance->bIsPlayingDown = true;
     }
 
     // 3回で撃破
