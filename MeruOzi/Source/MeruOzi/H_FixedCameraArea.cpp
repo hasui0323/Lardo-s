@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "H_FixedCameraArea.h"
 
 #include "Engine/Engine.h"
-
-#include "H_FixedCameraArea.h"
 
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"

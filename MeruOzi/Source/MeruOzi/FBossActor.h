@@ -9,6 +9,9 @@
 class USphereComponent;
 class USkeletalMeshComponent;
 
+class UCapsuleComponent;
+
+
 UCLASS()
 class MERUOZI_API AFBossActor : public AActor
 {
@@ -26,6 +29,10 @@ protected:
     // ボスのモデル
     UPROPERTY(VisibleAnywhere)
     USkeletalMeshComponent* BossMesh;
+
+    // ボス本体の当たり判定
+    UPROPERTY(VisibleAnywhere)
+    UCapsuleComponent* BossCollision;
 
     // 接近判定
     UPROPERTY(VisibleAnywhere)

@@ -10,6 +10,10 @@
 #include "InputCoreTypes.h"
 #include "FCharacter.h"
 
+#include "Components/CapsuleComponent.h"
+
+#include "FBossAnimInstance.h"
+
 // Sets default values
 AFBossActor::AFBossActor()
 {
@@ -23,6 +27,21 @@ AFBossActor::AFBossActor()
     BossMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BossMesh"));
     RootComponent = BossMesh;
 
+    //--------------------------------------------------------
+    // ボス本体の当たり判定
+    BossCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BossCollision"));
+    BossCollision->SetupAttachment(RootComponent);
+
+    // 当たり判定の大きさ
+    BossCollision->SetCapsuleSize(50.0f, 100.0f);
+
+    // プレイヤーと衝突させる
+    BossCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    BossCollision->SetCollisionObjectType(ECC_WorldStatic);
+    BossCollision->SetCollisionResponseToAllChannels(ECR_Block);
+    BossCollision->SetGenerateOverlapEvents(false);
+
+    //--------------------------------------------------------
     // 接近判定
     AttackRange = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRange"));
     AttackRange->SetupAttachment(RootComponent);
@@ -101,6 +120,16 @@ void AFBossActor::Interact(AActor* Player)
     // ログに表示
     UE_LOG(LogTemp, Warning, TEXT("Boss: %d / %d"),
         InteractionCount, RequiredInteractions);
+
+    // アニメーションインスタンスを取得
+    UFBossAnimInstance* AnimInstance =
+        Cast<UFBossAnimInstance>(BossMesh->GetAnimInstance());
+
+    // ダウン状態にする
+    if (AnimInstance)
+    {
+        AnimInstance->bIsDown = true;
+    }
 
     // 3回で撃破
     if (InteractionCount >= RequiredInteractions)
