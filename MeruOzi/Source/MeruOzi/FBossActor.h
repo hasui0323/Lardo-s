@@ -44,7 +44,7 @@ protected:
 
     // 撃破に必要な回数
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
-    int32 RequiredInteractions = 3;
+    int32 RequiredInteractions = 1;
 
     // インタラクトできるか
     bool bCanInteract = false;
@@ -75,6 +75,10 @@ public:
 
     // Fキーを押したときの処理
     void InteractWithBoss();
+
+    // ダウンアニメーション終了後にボスを消す
+    UFUNCTION(BlueprintCallable)
+    void FinishDownAnimation();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

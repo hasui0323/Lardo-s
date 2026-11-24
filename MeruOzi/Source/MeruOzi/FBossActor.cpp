@@ -114,31 +114,26 @@ void AFBossActor::Interact(AActor* Player)
         return;
     }
 
-    // 回数を増やす
-    InteractionCount++;
-
-    // ログに表示
-    UE_LOG(LogTemp, Warning, TEXT("Boss: %d / %d"),
-        InteractionCount, RequiredInteractions);
-
     // アニメーションインスタンスを取得
     UFBossAnimInstance* AnimInstance =
         Cast<UFBossAnimInstance>(BossMesh->GetAnimInstance());
 
-    // アニメーションが再生中でなければダウンさせる
-    if (AnimInstance && !AnimInstance->bIsDown)
+    if (!AnimInstance)
     {
-        AnimInstance->bIsDown = true;
-       // AnimInstance->bIsPlayingDown = true;
+        return;
     }
 
-    // 3回で撃破
-    if (InteractionCount >= RequiredInteractions)
+    // すでにダウン中なら何もしない
+    if (AnimInstance->bIsPlayingDown)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Boss Defeated!"));
-        Destroy();
+        return;
     }
 
+    // ダウンアニメーションを再生
+    AnimInstance->bIsPlayingDown = true;
+    AnimInstance->bIsDown = true;
+
+    UE_LOG(LogTemp, Warning, TEXT("Boss Down!"));
 }
 
 
@@ -163,3 +158,10 @@ void AFBossActor::InteractWithBoss()
     }
 }
 
+// ダウンアニメーション終了後に呼ばれる
+void AFBossActor::FinishDownAnimation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Boss Destroy!"));
+
+    Destroy();
+}
