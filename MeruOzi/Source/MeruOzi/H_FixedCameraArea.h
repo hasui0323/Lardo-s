@@ -43,6 +43,10 @@ public:
     UFUNCTION(BlueprintPure, Category = "Spawn")
     bool HasSpawnOption(int32 Index) const;
 
+    // 指定したボタンが使用済みか確認する
+    UFUNCTION(BlueprintPure, Category = "Spawn")
+    bool IsSpawnOptionUsed(int32 Index) const;
+
 protected:
     virtual void BeginPlay() override;
 
@@ -77,9 +81,7 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Spawn")
     void SpawnObjectByIndex(int32 Index);
 
-    // 指定したボタンが使用済みか確認する
-    UFUNCTION(BlueprintPure, Category = "Spawn")
-    bool IsSpawnOptionUsed(int32 Index) const;
+  
 
     // 範囲内にいるか
     bool bPlayerInRange = false;

@@ -417,6 +417,18 @@ void AH_FixedCameraArea::SpawnObjectByIndex(int32 Index)
         Index,
         *Option.SpawnLocation.ToString(),
         *GetNameSafe(Option.ObjectClass.Get()));
+
+    // スポーン後にボタンの表示を更新
+    if (CameraControlWidget)
+    {
+        UH_CameraControlWidgetBase* ControlWidget =
+            Cast<UH_CameraControlWidgetBase>(CameraControlWidget);
+
+        if (ControlWidget)
+        {
+            ControlWidget->RefreshSpawnButtonVisibility();
+        }
+    }
 }
 
 bool AH_FixedCameraArea::IsSpawnOptionUsed(int32 Index) const

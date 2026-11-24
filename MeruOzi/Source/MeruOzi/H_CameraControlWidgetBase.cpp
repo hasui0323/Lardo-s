@@ -20,6 +20,11 @@ void UH_CameraControlWidgetBase::NativeConstruct()
     UpdateSpawnButtonVisibility();
 }
 
+void UH_CameraControlWidgetBase::RefreshSpawnButtonVisibility()
+{
+    UpdateSpawnButtonVisibility();
+}
+
 void UH_CameraControlWidgetBase::UpdateSpawnButtonVisibility()
 {
     if (!FixedCameraAreaRef)
@@ -28,67 +33,51 @@ void UH_CameraControlWidgetBase::UpdateSpawnButtonVisibility()
         return;
     }
 
-    // A
+    // Aボタン
     if (Button_A)
     {
-        bool bVisible = FixedCameraAreaRef->HasSpawnOption(0);
+        bool bVisible =
+            FixedCameraAreaRef->HasSpawnOption(0) &&
+            !FixedCameraAreaRef->IsSpawnOptionUsed(0);
 
         Button_A->SetVisibility(
             bVisible ? ESlateVisibility::Visible
             : ESlateVisibility::Collapsed);
-
-        UE_LOG(LogTemp, Warning, TEXT("Button_A Visible: %d"), bVisible);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Button_A is NULL"));
     }
 
-    // B
+    // Bボタン
     if (Button_B)
     {
-        bool bVisible = FixedCameraAreaRef->HasSpawnOption(1);
+        bool bVisible =
+            FixedCameraAreaRef->HasSpawnOption(1) &&
+            !FixedCameraAreaRef->IsSpawnOptionUsed(1);
 
         Button_B->SetVisibility(
             bVisible ? ESlateVisibility::Visible
             : ESlateVisibility::Collapsed);
-
-        UE_LOG(LogTemp, Warning, TEXT("Button_B Visible: %d"), bVisible);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Button_B is NULL"));
     }
 
-    // C
+    // Cボタン
     if (Button_C)
     {
-        bool bVisible = FixedCameraAreaRef->HasSpawnOption(2);
+        bool bVisible =
+            FixedCameraAreaRef->HasSpawnOption(2) &&
+            !FixedCameraAreaRef->IsSpawnOptionUsed(2);
 
         Button_C->SetVisibility(
             bVisible ? ESlateVisibility::Visible
             : ESlateVisibility::Collapsed);
-
-        UE_LOG(LogTemp, Warning, TEXT("Button_C Visible: %d"), bVisible);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Button_C is NULL"));
     }
 
-    // D
+    // Dボタン
     if (Button_D)
     {
-        bool bVisible = FixedCameraAreaRef->HasSpawnOption(3);
+        bool bVisible =
+            FixedCameraAreaRef->HasSpawnOption(3) &&
+            !FixedCameraAreaRef->IsSpawnOptionUsed(3);
 
         Button_D->SetVisibility(
             bVisible ? ESlateVisibility::Visible
             : ESlateVisibility::Collapsed);
-
-        UE_LOG(LogTemp, Warning, TEXT("Button_D Visible: %d"), bVisible);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Button_D is NULL"));
     }
 }

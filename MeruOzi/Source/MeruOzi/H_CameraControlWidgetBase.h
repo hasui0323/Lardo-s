@@ -23,6 +23,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Camera")
     void SetFixedCameraAreaRef(AH_FixedCameraArea* Area);
 
+    // ボタンの表示を更新
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    void RefreshSpawnButtonVisibility();
+
 protected:
 
     virtual void NativeConstruct() override;
