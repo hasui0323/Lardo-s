@@ -4,6 +4,8 @@
 
 #include "Engine/Engine.h"
 
+#include "Components/ActorComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
@@ -18,6 +20,10 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "InputCoreTypes.h"
+
+#include "TimerManager.h"
+#include "Components/PrimitiveComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 #include "Blueprint/UserWidget.h"
 
@@ -230,6 +236,9 @@ void AH_FixedCameraArea::SwitchCamera()
         }
 
         bCameraFixed = true;
+
+        // プレビューを生成
+        CreateSpawnPreviews();
     }
     else
     {
@@ -239,6 +248,9 @@ void AH_FixedCameraArea::SwitchCamera()
 
 void AH_FixedCameraArea::RestoreCamera()
 {
+    // プレビューを削除
+    ClearSpawnPreviews();
+
     APlayerController* PC =
         UGameplayStatics::GetPlayerController(this, 0);
 
@@ -374,6 +386,32 @@ void AH_FixedCameraArea::SpawnObjectByIndex(int32 Index)
     {
         SpawnedOptionIndices.Remove(Index);
     }
+    else
+    {
+        // 押したボタンに対応するプレビューだけ削除
+        if (PreviewActors.Contains(Index))
+        {
+            if (IsValid(PreviewActors[Index]))
+            {
+                PreviewActors[Index]->Destroy();
+            }
+
+            PreviewActors.Remove(Index);
+        }
+
+        UE_LOG(LogTemp, Warning,
+            TEXT("Preview Removed: Index=%d"),
+            Index);
+
+        // すべてのプレビューがなくなった場合のみタイマー停止
+        if (PreviewActors.Num() == 0)
+        {
+            GetWorldTimerManager().ClearTimer(
+                PreviewBlinkTimer
+            );
+        }
+    }
+
     UE_LOG(LogTemp, Warning,
         TEXT("Spawn Index=%d, Location=%s, Class=%s"),
         Index,
@@ -414,4 +452,189 @@ bool AH_FixedCameraArea::HasSpawnOption(int32 Index) const
         *GetNameSafe(SpawnOptions[Index].ObjectClass.Get()));
 
     return bHasClass;
+}
+
+// プレビュー生成
+void AH_FixedCameraArea::CreateSpawnPreviews()
+{
+    UWorld* World = GetWorld();
+
+    if (!World)
+    {
+        return;
+    }
+
+    // 以前のプレビューを削除
+    ClearSpawnPreviews();
+
+    for (int32 i = 0; i < SpawnOptions.Num(); i++)
+    {
+        // すでにスポーン済みなら無視
+        if (SpawnedOptionIndices.Contains(i))
+        {
+            continue;
+        }
+
+        const FCameraSpawnOption& Option = SpawnOptions[i];
+
+        if (!Option.ObjectClass)
+        {
+            continue;
+        }
+
+        FActorSpawnParameters Params;
+
+        // 他のオブジェクトと重なっていても生成する
+        Params.SpawnCollisionHandlingOverride =
+            ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+        // オブジェクトを生成
+        AActor* PreviewActor = World->SpawnActor<AActor>(
+            Option.ObjectClass,
+            Option.SpawnLocation,
+            Option.SpawnRotation,
+            Params
+        );
+
+        if (!PreviewActor)
+        {
+            continue;
+        }
+
+        // プレビューはゲーム処理に影響させない
+        PreviewActor->SetActorEnableCollision(false);
+        PreviewActor->SetActorTickEnabled(false);
+
+        TArray<UPrimitiveComponent*> Components;
+
+        PreviewActor->GetComponents<UPrimitiveComponent>(Components);
+
+        for (UPrimitiveComponent* Primitive : Components)
+        {
+            if (Primitive)
+            {
+                Primitive->SetCollisionEnabled(
+                    ECollisionEnabled::NoCollision);
+
+                Primitive->SetGenerateOverlapEvents(false);
+                Primitive->SetComponentTickEnabled(false);
+            }
+        }
+
+        // 半透明化を試みる
+        ApplyPreviewOpacity(PreviewActor);
+
+        // 配列番号とプレビューを紐付ける
+        PreviewActors.Add(i, PreviewActor);
+    }
+
+    // 点滅開始
+    bPreviewVisible = true;
+
+    GetWorldTimerManager().SetTimer(
+        PreviewBlinkTimer,
+        this,
+        &AH_FixedCameraArea::UpdatePreviewVisibility,
+        0.5f,
+        true
+    );
+}
+
+//半透明処理
+void AH_FixedCameraArea::ApplyPreviewOpacity(
+    AActor* PreviewActor)
+{
+    if (!PreviewActor)
+    {
+        return;
+    }
+
+    // PrimitiveComponentを取得
+    TArray<UPrimitiveComponent*> Components;
+
+    PreviewActor->GetComponents<UPrimitiveComponent>(Components);
+
+    for (UPrimitiveComponent* Primitive : Components)
+    {
+        if (!Primitive)
+        {
+            continue;
+        }
+
+        int32 MaterialCount = Primitive->GetNumMaterials();
+
+        for (int32 i = 0; i < MaterialCount; i++)
+        {
+            UMaterialInstanceDynamic* DynamicMaterial =
+                Primitive->CreateAndSetMaterialInstanceDynamic(i);
+
+            if (DynamicMaterial)
+            {
+                DynamicMaterial->SetScalarParameterValue(
+                    FName("Opacity"),
+                    0.3f
+                );
+            }
+        }
+    }
+}
+
+//点滅処理
+void AH_FixedCameraArea::UpdatePreviewVisibility()
+{
+    // プレビューが残っていなければタイマー停止
+    if (PreviewActors.Num() == 0)
+    {
+        GetWorldTimerManager().ClearTimer(
+            PreviewBlinkTimer
+        );
+        return;
+    }
+
+    bPreviewVisible = !bPreviewVisible;
+
+    for (auto It = PreviewActors.CreateIterator(); It; ++It)
+    {
+        AActor* PreviewActor = It.Value();
+
+        // 無効なActorを削除
+        if (!IsValid(PreviewActor))
+        {
+            It.RemoveCurrent();
+            continue;
+        }
+
+        // 有効なプレビューだけ点滅
+        PreviewActor->SetActorHiddenInGame(
+            !bPreviewVisible
+        );
+    }
+
+    // 全部なくなったら停止
+    if (PreviewActors.Num() == 0)
+    {
+        GetWorldTimerManager().ClearTimer(
+            PreviewBlinkTimer
+        );
+    }
+}
+
+//プレビュー削除処理
+void AH_FixedCameraArea::ClearSpawnPreviews()
+{
+    // タイマー停止
+    GetWorldTimerManager().ClearTimer(
+        PreviewBlinkTimer
+    );
+
+    // プレビューを削除
+    for (auto& Pair : PreviewActors)
+    {
+        if (IsValid(Pair.Value))
+        {
+            Pair.Value->Destroy();
+        }
+    }
+
+    PreviewActors.Empty();
 }

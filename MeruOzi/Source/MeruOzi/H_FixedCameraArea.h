@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "NiagaraComponent.h"
+#include "TimerManager.h"
 #include "Blueprint/UserWidget.h"
 #include "H_FixedCameraArea.generated.h"
 
@@ -128,4 +129,26 @@ protected:
 
     // 生成済みのボタン番号
     TSet<int32> SpawnedOptionIndices;
+
+    // プレビュー用オブジェクト
+    UPROPERTY()
+    TMap<int32, TObjectPtr<AActor>> PreviewActors;
+
+    // 点滅用タイマー
+    FTimerHandle PreviewBlinkTimer;
+
+    // 現在の表示状態
+    bool bPreviewVisible = true;
+
+    // プレビューを生成
+    void CreateSpawnPreviews();
+
+    // プレビューをすべて削除
+    void ClearSpawnPreviews();
+
+    // 点滅処理
+    void UpdatePreviewVisibility();
+
+    // 半透明化を試みる
+    void ApplyPreviewOpacity(AActor* PreviewActor);
 };
