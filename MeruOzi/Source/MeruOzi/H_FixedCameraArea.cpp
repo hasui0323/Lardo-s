@@ -193,6 +193,12 @@ void AH_FixedCameraArea::SwitchCamera()
         PC->SetIgnoreMoveInput(true);
         PC->SetIgnoreLookInput(true);
 
+        // プレイヤーの入力を停止
+        if (PlayerPawn)
+        {
+            PlayerPawn->DisableInput(PC);
+        }
+
         // 既存の案内を消す
         HidePrompt();
 
@@ -273,28 +279,18 @@ void AH_FixedCameraArea::RestoreCamera()
         PC->SetIgnoreMoveInput(false);
         PC->SetIgnoreLookInput(false);
 
-        // マウスカーソルと入力モードを戻す
-        PC->bShowMouseCursor = false;
-        PC->SetInputMode(FInputModeGameOnly());
-
-        // キャラクターの移動を再び有効にする
+        // プレイヤーの入力を再び有効にする
         APawn* PlayerPawn =
             UGameplayStatics::GetPlayerPawn(this, 0);
 
-        ACharacter* PlayerCharacter =
-            Cast<ACharacter>(PlayerPawn);
-
-        if (PlayerCharacter)
+        if (PlayerPawn)
         {
-            UCharacterMovementComponent* Movement =
-                PlayerCharacter->GetCharacterMovement();
-
-            if (Movement &&
-                Movement->MovementMode == MOVE_None)
-            {
-                Movement->SetMovementMode(MOVE_Walking);
-            }
+            PlayerPawn->EnableInput(PC);
         }
+
+        // マウスカーソルと入力モードを戻す
+        PC->bShowMouseCursor = false;
+        PC->SetInputMode(FInputModeGameOnly());
     }
 
     PreviousViewTarget = nullptr;
